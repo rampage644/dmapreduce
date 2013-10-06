@@ -96,8 +96,6 @@ int Map(const char *data,
 	Buffer *map_buffer ){
 
   assert(PyMapFunc);
-  fprintf(stderr, "before buffer count = %d, size = %d \n", map_buffer->header.count,
-          map_buffer->header.buf_size);
 
   // create arguments for Reduce function call
   // MapReduceBuffer to fill
@@ -112,6 +110,14 @@ int Map(const char *data,
                                  size,
                                  last_chunk,
                                  MapReduceBuffer);
+
+  fprintf(stderr, "before  addr=%p buffer count = %d, size = %d data=%p pybuffer=%p\n",
+          map_buffer,
+          map_buffer->header.count,
+          map_buffer->header.buf_size,
+          data,
+          buffer->buf);
+
   // call python reduce routine
   PyObject* val = PyObject_CallObject(PyMapFunc, args);
 //  TODO: uncomment and fix that!
