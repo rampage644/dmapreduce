@@ -2,7 +2,7 @@
 
 import os, sys
 import unittest
-import ztest
+import zmapreduce
 
 class BasicTestCase(unittest.TestCase):
 	def setUp(self):

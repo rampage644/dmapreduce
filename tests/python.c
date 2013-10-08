@@ -1,5 +1,5 @@
 #include <Python.h>
-#include <ztestmodule.h>
+#include <zmapreducemodule.h>
 
 #define BUFFER_SIZE 1*1024*1024
 
@@ -49,7 +49,6 @@ int main(int argc, char** argv) {
   assert(!Py_Main(py_argc, py_argv));
   printf("rc=%d\n", MapReduceBuffer->ob_refcnt);
 
-  Py_DECREF(MapReduceBuffer);
   printf("rc=%d\n", MapReduceBuffer->ob_refcnt);
   PyBuffer_Release(buffer);
   printf("rc=%d\n", MapReduceBuffer->ob_refcnt);
