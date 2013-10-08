@@ -22,7 +22,7 @@
 #include "mapreduce/buffer.h"
 
 #include "Python.h"
-#include "ztestmodule.h"
+#include "zmapreducemodule.h"
 
 extern PyObject* PyComparatorHashFunc;
 extern PyObject* PyReduceFunc;
