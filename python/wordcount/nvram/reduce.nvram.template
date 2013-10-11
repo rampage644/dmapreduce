@@ -6,6 +6,4 @@ name=REDUCE_NAME,    value=red
 args=red-{NODEID}
 
 [fstab]
-channel=/dev/include.tar, mountpoint=/, access=ro
-channel=/dev/include_clang.tar, mountpoint=/, access=ro
-channel=/dev/src.tar, mountpoint=/, access=ro
+channel=/dev/python.tar, mountpoint=/, access=ro

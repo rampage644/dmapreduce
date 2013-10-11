@@ -1,4 +1,6 @@
 {CHANNELS_INCLUDE}
+Channel = {ABS_PATH}mapreduce.py, /dev/mapreduce.py, 0, 0, 999999, 999999, 0, 0
+Channel = {ABS_PATH}python.tar, /dev/python.tar, 3, 0, 99999999, 99999999, 0, 0
 
 =====================================================================
 == switches for zerovm. some of them used to control nexe, some

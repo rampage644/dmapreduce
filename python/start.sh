@@ -27,6 +27,8 @@ let NUMBER_OF_NODES=${MAP_LAST}+${REDUCE_LAST}
 ./ns_start.sh ${NUMBER_OF_NODES}
 
 rm ${ZVM_REPORT} -f $DIRNAME/*.nexe $DIRNAME/*.tar
+rm $DIRNAME/log/ -rf
+mkdir $DIRNAME/log
 ln -s `pwd`/map.nexe $DIRNAME/
 ln -s `pwd`/reduce.nexe $DIRNAME/
 ln -s `pwd`/python.tar $DIRNAME/
@@ -45,6 +47,8 @@ while [  $COUNTER -le $REDUCE_LAST ]; do
     ${SETARCH} ${ZEROVM} $DIRNAME/manifest/reduce$COUNTER.manifest >> ${ZVM_REPORT} &
     let COUNTER=COUNTER+1 
 done
+
+#zgdb reduce.manifest
 
 for job in `jobs -p`
 do

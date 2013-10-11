@@ -27,6 +27,8 @@
 extern PyObject* PyComparatorHashFunc;
 extern PyObject* PyReduceFunc;
 extern PyObject* PyMapFunc;
+extern PyObject* PyCombineFunc;
+
 static int 
 ComparatorHash(const void *h1, const void *h2){
   PyObject* args = Py_BuildValue("(s#, s#)", h1, HASH_SIZE, h2, HASH_SIZE);
@@ -210,12 +212,101 @@ int Reduce( const Buffer *reduced_buffer ){
 //    return 0;
 }
 
+#define COMBINE_VALUES(newelasticdata, elasticdata2)			\
+    /*save value depends on wordcount config*/				\
+    if ( VALUE_ADDR_AS_DATA == 1){					\
+  /*use combine_elasticdata->value.addr as 4byte value*/		\
+  (newelasticdata)->value.addr += (elasticdata2)->value.addr;	\
+  (newelasticdata)->own_value = EDataNotOwned;			\
+    }									\
+    else{								\
+  /*interpret elasticdata->value.addr as 4bytes pointer		\
+   *and save non null terminated string representation of value;	\
+   *it's test second use case of mapreduce library*/		\
+  (newelasticdata)->value.addr					\
+      = (uintptr_t) realloc( (void*)(newelasticdata)->value.addr,	\
+           (newelasticdata)->value.size		\
+           + (elasticdata2)->value.size + 1 );	\
+  /*add "+" char*/						\
+  memcpy( (void*)(newelasticdata)->value.addr+(newelasticdata)->value.size, \
+    "+", 1 );						\
+  /*add value*/							\
+  memcpy( (void*)(newelasticdata)->value.addr+(newelasticdata)->value.size+1, \
+    (void*)(elasticdata2)->value.addr,			\
+    (elasticdata2)->value.size );				\
+  (newelasticdata)->value.size += (elasticdata2)->value.size+1;	\
+    }
+
+
+
+int Combine( const Buffer *map_buffer,
+       Buffer *reduce_buffer ){
+
+  assert (PyCombineFunc);
+  PyObject* MapReduceBufferOutput = MapReduceBuffer_FromBuffer((Buffer*)reduce_buffer);
+  PyObject* MapReduceBufferInput = MapReduceBuffer_FromBuffer((Buffer*)map_buffer);
+  PyObject* args = Py_BuildValue("(OO)",
+                                 MapReduceBufferInput,
+                                 MapReduceBufferOutput);
+  // call python reduce routine
+  PyObject* val = PyObject_CallObject(PyCombineFunc, args);
+  if (!val)
+  {
+    PyErr_Print();
+    exit(-1);
+  }
+
+  Py_DECREF(val);
+  Py_DECREF(args);
+//    int combined_count=0;
+
+//    /*declare buf item to use it as current loop item*/
+//    ElasticBufItemData* current_elasticdata;
+//    /*declare combine item and init it default by nearest value */
+//    ElasticBufItemData* combine_elasticdata = alloca(map_buffer->header.item_size);
+//    if ( map_buffer->header.count ){
+//  GetBufferItem( map_buffer, 0, combine_elasticdata );
+//    }
+
+//    /*go through items of sorted map_buffer*/
+//    for (int i=0; i < map_buffer->header.count; i++){
+//  /*current loop item*/
+//  current_elasticdata = (ElasticBufItemData*) BufferItemPointer( map_buffer, i );
+//  /*if current item can be added into reduce_buffer*/
+//  if ( //(i == map_buffer->header.count - 1) ||
+//      *(HASH_TYPE*)&current_elasticdata->key_hash !=
+//      *(HASH_TYPE*)&combine_elasticdata->key_hash /* && i > 0 */ ){
+
+//      /*save previously combined item*/
+//      AddBufferItem( reduce_buffer, combine_elasticdata );
+//      /*set current item as next combine value */
+//      GetBufferItem( map_buffer, i, combine_elasticdata );
+//      combined_count=1;
+//  }
+//  /*if previous item and new one has the same key then we need
+//   *to modify value of item to reduce it*/
+//  else{
+//      ++combined_count;
+//      /*update value only for items that now combining more than one item*/
+//      if ( combined_count > 1 ){
+//    COMBINE_VALUES(combine_elasticdata, current_elasticdata);
+//    TRY_FREE_MRITEM_DATA(current_elasticdata);
+//      }
+//  }
+//    }
+
+//    /*save last combined value if combined item not yet added*/
+//    if (combined_count>0){
+//  AddBufferItem( reduce_buffer, combine_elasticdata );
+//    }
+    return 0;
+}
 
 void InitInterface( struct MapReduceUserIf* mr_if ){
     memset( mr_if, '\0', sizeof(struct MapReduceUserIf) );
     PREPARE_MAPREDUCE(mr_if, 
 		      Map, 
-		      NULL, 
+          Combine,
 		      Reduce, 
 		      ComparatorElasticBufItemByHashQSort,
 		      ComparatorHash,

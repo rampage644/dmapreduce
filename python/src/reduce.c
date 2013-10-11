@@ -25,6 +25,7 @@
 PyObject* PyComparatorHashFunc = 0;
 PyObject* PyReduceFunc = 0;
 PyObject* PyMapFunc = 0;
+PyObject* PyCombineFunc = 0;
 
 int main(int argc, char **argv){
     /* argv[0] is node name
@@ -96,6 +97,10 @@ int main(int argc, char **argv){
     PyMapFunc =
         PyDict_GetItemString(dictionary, "Map");     // borrowed reference
     assert(PyMapFunc && PyCallable_Check(PyMapFunc));
+
+    PyCombineFunc =
+        PyDict_GetItemString(dictionary, "Combine");     // borrowed reference
+    assert(PyCombineFunc && PyCallable_Check(PyCombineFunc));
 
     InitInterface(&mr_if);
     res = ReduceNodeMain(&mr_if, &chan_if); /*start reduce node*/
