@@ -16,7 +16,7 @@ CFLAGS+=-I/home/zvm/git/zpython2/install/include/python2.7 -I/home/zvm/git/zpyth
 NAME=python_test
 
 all: $(NAME).nexe manifest
-	$(ZEROVM) $(NAME).manifest
+	$(ZEROVM) $(NAME).manifest || true
 	@cat stdout.$(NAME)
 	@echo "=============="
 	@cat stderr.$(NAME)

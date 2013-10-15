@@ -3,6 +3,7 @@
 import os, sys
 import unittest
 import hashlib
+import zmapreduce
 import _zmapreduce
 
 def Combine(input, output):
@@ -55,7 +56,35 @@ class MapReduceFunctionsTestCase(unittest.TestCase):
 		self.assertEqual(input_count, 
 			output_count)
 
-class BasicTestCase(unittest.TestCase):
+class ZMapReduceModuleTest(unittest.TestCase):
+	def testNodeFailedStart(self):
+		n = zmapreduce.Node(0)
+		with self.assertRaises(NotImplementedError):
+			n._do_init()
+		with self.assertRaises(NotImplementedError):
+			n._do_init()
+		with self.assertRaises(NotImplementedError):
+			n.start()
+
+
+	def testMapNodeInit(self):
+		m = zmapreduce.Mapper(1)
+		m.map_fn = lambda x: x
+		m.reduce_fn = lambda x: x
+		m.comparator_fn = lambda : True
+		m.mritem_size = 28
+		m.hash_size = 8
+	
+	def testReduceNodeInit(self):
+		r = zmapreduce.Reducer(1)
+		r.map_fn = lambda x: x
+		r.reduce_fn = lambda x: x
+		r.comparator_fn = lambda : True
+		r.mritem_size = 28
+		r.hash_size = 8
+		r._do_init()
+
+class ZMapReduceCExtensionTest(unittest.TestCase):
 	def setUp(self):
 		pass
 
@@ -78,6 +107,7 @@ class BasicTestCase(unittest.TestCase):
 			b = ztest.Buffer()
 
 	def testBufferAppending(self):
+		buffer.clear()
 		r =  buffer.append()
 		self.assertIsNotNone(r)
 		self.assertEqual(len(buffer), 1)
@@ -120,6 +150,9 @@ class BasicTestCase(unittest.TestCase):
 		self.assertIsNotNone(obuffer)
 
 	def testInputToOutputBuffer(self):
+		buffer.clear()
+		obuffer.clear()
+
 		for i in xrange(1, 5):
 			r = buffer.append()
 			r.key = ('word%d' % i) * i
