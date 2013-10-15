@@ -37,26 +37,23 @@ int main(int argc, char** argv) {
   Buffer mr_buffer;
   AllocBuffer(&mr_buffer, 28 /* ??? */, 1024);
   PyObject* MapReduceBuffer = MapReduceBuffer_FromBuffer(&mr_buffer);
-  printf("rc=%d\n", MapReduceBuffer->ob_refcnt);
+
+  Buffer mr_obuffer; // output buffer
+  AllocBuffer(&mr_obuffer, 28 /* ??? */, 1024);
+  PyObject* MapReduceOBuffer = MapReduceBuffer_FromBuffer(&mr_obuffer);
+
   assert (!PyDict_SetItemString(dictionary, "buffer", MapReduceBuffer));
-  printf("rc=%d\n", MapReduceBuffer->ob_refcnt);
+  assert (!PyDict_SetItemString(dictionary, "obuffer", MapReduceOBuffer));
   Py_DECREF(MapReduceBuffer);
-  printf("rc=%d\n", MapReduceBuffer->ob_refcnt);
 
   // ok, now we read to run py interpreter: command, string, file
   int py_argc = 2;
   char* py_argv[] = {"python", "/dev/test.py"};
   assert(!Py_Main(py_argc, py_argv));
-  printf("rc=%d\n", MapReduceBuffer->ob_refcnt);
-
-  printf("rc=%d\n", MapReduceBuffer->ob_refcnt);
   PyBuffer_Release(buffer);
-  printf("rc=%d\n", MapReduceBuffer->ob_refcnt);
   Py_DECREF(mv);
-  printf("rc=%d\n", MapReduceBuffer->ob_refcnt);
   free(buffer);
 
-  fprintf(stdout, "refcount=%d\n", MapReduceBuffer->ob_refcnt);
   Py_Finalize();
   return 0;
 }

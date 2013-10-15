@@ -16,6 +16,7 @@ Channel = {ABS_PATH}/stderr.{NAME}, /dev/stderr, 0, 0, 0, 0, 9999999, 9999999
 Channel = {ABS_PATH}/nvram.{NAME}.conf, /dev/nvram, 0, 0, 999999, 999999, 0, 0
 Channel = {ABS_PATH}/test.py, /dev/test.py, 0, 0, 999999, 999999, 0, 0
 Channel = {ABS_PATH}/mount/python.tar, /dev/python.tar, 0, 0, 99999999, 99999999, 0, 0
+Channel = {ABS_PATH}/input.txt, /dev/input.txt, 0, 0, 99999999, 99999999, 0, 0
 
 Version = 20130611
 Program = {ABS_PATH}/{NAME}.nexe
