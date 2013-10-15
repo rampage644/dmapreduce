@@ -5,7 +5,7 @@ name=REDUCE_NAME,    value=red
 name=MAP_CHUNK_SIZE, value=100485700
 
 [args]
-args=map-{NODEID}
+args=python.nexe /dev/map.py map-{NODEID}
 
 [fstab]
 channel=/dev/python.tar, mountpoint=/, access=ro
