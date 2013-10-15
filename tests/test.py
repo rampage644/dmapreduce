@@ -32,7 +32,12 @@ class MapReduceFunctionsTestCase(unittest.TestCase):
 		output_count = 0
 		buffer.clear()
 		obuffer.clear()
-		_zmapreduce.hash(8)
+		_zmapreduce._module_set_callbacks(None,
+                                  None,
+                                  None,
+                                  None,
+                                  0,
+                                  8)
 
 		with open('/dev/input.txt') as input_file:
 			for line in input_file:
@@ -207,13 +212,15 @@ class ZMapReduceCExtensionTest(unittest.TestCase):
 		self.assertIsNot(r1.key, r2.key)
 		self.assertIsNot(r1.value, r2.value)
 
-	def testSettingHashSize(self):
-		_zmapreduce.hash(10)
-		_zmapreduce.hash(4)
-
 	def testHashValues(self):
 		# setting size of hash to 4 bytes
-		_zmapreduce.hash(4)
+		# a tricky hack to set hash size to 4 bytes
+		_zmapreduce._module_set_callbacks(None,
+                                  None,
+                                  None,
+                                  None,
+                                  0,
+                                  4)
 
 		r = buffer.append()
 		r.hash = r'qwer'
@@ -226,7 +233,12 @@ class ZMapReduceCExtensionTest(unittest.TestCase):
 		self.assertNotEquals(r.hash, r'qwertyuiop[]')
 
 		# bytes
-		_zmapreduce.hash(10)
+		_zmapreduce._module_set_callbacks(None,
+                                  None,
+                                  None,
+                                  None,
+                                  0,
+                                  10)
 		r = buffer.append()
 		r.hash = r'1234567890'
 
@@ -243,7 +255,12 @@ class ZMapReduceCExtensionTest(unittest.TestCase):
 	def testHashValuesFromMemoryView(self):
 		data = r'qwertyuiop[]asdfghjkl;zxcvbnm,./1234567890-='
 		mv = memoryview(data)
-		_zmapreduce.hash(4)
+		_zmapreduce._module_set_callbacks(None,
+                                  None,
+                                  None,
+                                  None,
+                                  0,
+                                  4)
 
 		buffer.clear()
 		r1 = buffer.append()
