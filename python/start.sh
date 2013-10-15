@@ -29,8 +29,7 @@ let NUMBER_OF_NODES=${MAP_LAST}+${REDUCE_LAST}
 rm ${ZVM_REPORT} -f $DIRNAME/*.nexe $DIRNAME/*.tar
 rm $DIRNAME/log/ -rf
 mkdir $DIRNAME/log
-ln -s `pwd`/map.nexe $DIRNAME/
-ln -s `pwd`/reduce.nexe $DIRNAME/
+ln -s `pwd`/python.nexe $DIRNAME/
 ln -s `pwd`/python.tar $DIRNAME/
 
 COUNTER=$MAP_FIRST

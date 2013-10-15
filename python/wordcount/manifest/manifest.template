@@ -1,13 +1,16 @@
 {CHANNELS_INCLUDE}
-Channel = {ABS_PATH}mapreduce.py, /dev/mapreduce.py, 0, 0, 999999, 999999, 0, 0
 Channel = {ABS_PATH}python.tar, /dev/python.tar, 3, 0, 99999999, 99999999, 0, 0
+
+Channel = {ABS_PATH}map.py, /dev/map.py, 0, 0, 99999999, 99999999, 0, 0
+Channel = {ABS_PATH}reduce.py, /dev/reduce.py, 0, 0, 99999999, 99999999, 0, 0
+Channel = {ABS_PATH}mapreduce.py, /dev/mapreduce.py, 0, 0, 99999999, 99999999, 0, 0
 
 =====================================================================
 == switches for zerovm. some of them used to control nexe, some
 == for the internal zerovm needs
 =====================================================================
 Version = 20130611
-Program = {ABS_PATH}{NAME}.nexe
+Program = {ABS_PATH}python.nexe
 Memory = 0x10000000, 0
 NameServer = udp:127.0.0.1:54321
 Timeout={TIMEOUT}
