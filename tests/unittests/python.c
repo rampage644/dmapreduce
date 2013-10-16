@@ -45,6 +45,7 @@ int main(int argc, char** argv) {
   assert (!PyDict_SetItemString(dictionary, "buffer", MapReduceBuffer));
   assert (!PyDict_SetItemString(dictionary, "obuffer", MapReduceOBuffer));
   Py_DECREF(MapReduceBuffer);
+  Py_DECREF(MapReduceOBuffer);
 
   // ok, now we read to run py interpreter: command, string, file
   int py_argc = 2;
