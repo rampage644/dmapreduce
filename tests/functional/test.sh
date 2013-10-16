@@ -12,6 +12,7 @@ sed "s@{ABS_PATH}@$SCRIPTPATH/@" manifest/reduce.manifest.template > manifest/re
 
 ${SETARCH} ${ZEROVM} manifest/map.manifest >> ${ZVM_REPORT} &
 ${SETARCH} ${ZEROVM} manifest/reduce.manifest >> ${ZVM_REPORT} &
+#zgdb manifest/map.manifest python.nexe
 
 for job in `jobs -p`
 do

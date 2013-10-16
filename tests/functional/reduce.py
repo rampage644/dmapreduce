@@ -4,6 +4,7 @@ import sys
 import zmapreduce
 import mapreduce
 
+sys.setcheckinterval(1000)
 node_id = int(sys.argv[1].split('-')[1])
 
 r = zmapreduce.Reducer(node_id)

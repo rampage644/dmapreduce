@@ -1,25 +1,25 @@
 #!
-import os
-import sys
 import zmapreduce
 
 def ComparatorHash(h1, h2):
 	return h1 > h2
 
 def Reduce(buffer):
+	import os, sys
+	# buffered write, buf size is 100K
+	sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0x10000)
+	write = sys.stdout.write
 	for record in buffer:
-		sys.stdout.write(record.key)
-		sys.stdout.write(record.value)
+		write("%s%s" % (record.key, record.value))
 	return 0
-
-TERASORT_RECORD_SIZE = 100
-HASH_SIZE = 10
 
 def Map(data, size, last_chunk, buffer):
 	position = 0
-	while position < size:
-		record = buffer.append()
-		record.key = data[position:position+HASH_SIZE]
-		record.value = data[position+HASH_SIZE:position+TERASORT_RECORD_SIZE]
-		position += TERASORT_RECORD_SIZE
-	return position
+	tr_size =  100
+	h_size = 10
+	for position in xrange(0, size, tr_size):
+		buffer.append_record(
+			data[position:position+h_size],
+			data[position+h_size:position+tr_size],
+			data[position:position+h_size])
+	return size

@@ -9,3 +9,6 @@ args=python.nexe /dev/map.py map-1
 
 [fstab]
 channel=/dev/python.tar, mountpoint=/, access=ro
+
+[debug]
+verbosity=0

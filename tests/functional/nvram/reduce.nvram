@@ -7,3 +7,6 @@ args=python.nexe /dev/reduce.py red-1
 
 [fstab]
 channel=/dev/python.tar, mountpoint=/, access=ro
+
+[debug]
+verbosity=0
