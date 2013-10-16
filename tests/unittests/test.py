@@ -124,15 +124,16 @@ class ZMapReduceCExtensionTest(unittest.TestCase):
 		self.assertEqual(buffer[0].value, data[10:100])
 
 	def testBufferAppendingWithString(self):
+		buffer.clear()
 		r = buffer.append()
 		self.assertIsNotNone(r)
 		KEY = b'abc'
 		VALUE = b'abcdefghijklmnopqrstuvwxyz'
 		r.key = KEY
 		r.value = VALUE
-		self.assertEqual(len(buffer), 2)
-		self.assertEqual(buffer[1].key, KEY)
-		self.assertEqual(buffer[1].value, VALUE)
+		self.assertEqual(len(buffer), 1)
+		self.assertEqual(buffer[0].key, KEY)
+		self.assertEqual(buffer[0].value, VALUE)
 
 
 	def testBufferFailWrongIndex(self):
@@ -194,8 +195,8 @@ class ZMapReduceCExtensionTest(unittest.TestCase):
 
 	def testBufferMemoryViewAndStringsEquals(self):
 		# create test memoryview, buffer is memoryview
-		data = r'qwertyuiop[]asdfghjkl;zxcvbnm,./1234567890-='
-		mv = memoryview(data)
+		rdata = r'qwertyuiop[]asdfghjkl;zxcvbnm,./1234567890-='
+		mv = memoryview(rdata)
 
 		buffer.clear()
 		r1 = buffer.append()
@@ -253,8 +254,8 @@ class ZMapReduceCExtensionTest(unittest.TestCase):
 		self.assertNotEquals(r.hash, r'123456')
 
 	def testHashValuesFromMemoryView(self):
-		data = r'qwertyuiop[]asdfghjkl;zxcvbnm,./1234567890-='
-		mv = memoryview(data)
+		rdata = r'qwertyuiop[]asdfghjkl;zxcvbnm,./1234567890-='
+		mv = memoryview(rdata)
 		_zmapreduce._module_set_callbacks(None,
                                   None,
                                   None,
@@ -276,6 +277,50 @@ class ZMapReduceCExtensionTest(unittest.TestCase):
 
 		# reduce(lambda input_count, record: input_count += int(record.value), buffer)
 		# self.assertEqual(input_count, 0)
+
+	def testBufferAppendingRecordMemoryView(self):
+		buffer.clear()
+		self.assertEquals(len(buffer), 0)
+
+		buffer.append_record(
+			data[:10],
+			data[10:100],
+			data[:8])
+
+		self.assertEquals(len(buffer), 1)
+
+		# now check
+		self.assertEqual(buffer[0].key, data[:10])
+		self.assertEqual(buffer[0].value, data[10:100])
+		self.assertEqual(buffer[0].hash, data[:8])
+
+		r = buffer[0]
+		self.assertEqual(r.key, data[:10])
+		self.assertEqual(r.value, data[10:100])
+		self.assertEqual(r.hash, data[:8])
+
+
+
+	def testBufferAppendingRecordString(self):
+		buffer.clear()
+		self.assertEquals(len(buffer), 0)
+
+		buffer.append_record(
+			r'0123456789',
+			r'qwertyuiop[]asdfghjkl;zxcvbnm',
+			r'11111111')
+
+		self.assertEquals(len(buffer), 1)
+
+		# now check
+		self.assertEqual(buffer[0].key, r'0123456789')
+		self.assertEqual(buffer[0].value, r'qwertyuiop[]asdfghjkl;zxcvbnm',)
+		self.assertEqual(buffer[0].hash, r'11111111')
+
+		r = buffer[0]
+		self.assertEqual(r.key, r'0123456789')
+		self.assertEqual(r.value, r'qwertyuiop[]asdfghjkl;zxcvbnm',)
+		self.assertEqual(r.hash, r'11111111')
 	
 		
 if __name__ == "__main__":
