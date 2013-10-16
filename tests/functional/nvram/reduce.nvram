@@ -1,0 +1,9 @@
+[env]
+name=MAP_NAME,       value=map
+name=REDUCE_NAME,    value=red
+
+[args]
+args=python.nexe /dev/reduce.py red-1
+
+[fstab]
+channel=/dev/python.tar, mountpoint=/, access=ro
