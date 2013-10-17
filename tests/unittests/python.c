@@ -28,33 +28,43 @@ int main(int argc, char** argv) {
 
 
   // inject raw data into module
-  Py_buffer* buffer = (Py_buffer*) malloc(sizeof(Py_buffer));
-  PyBuffer_FillInfo(buffer, NULL, data, BUFFER_SIZE, 0, PyBUF_CONTIG);
-  mv = PyMemoryView_FromBuffer(buffer);
+  Py_buffer buffer;
+  PyBuffer_FillInfo(&buffer, NULL, data, BUFFER_SIZE, 0, PyBUF_CONTIG);
+  mv = PyMemoryView_FromBuffer(&buffer);
+  assert (mv->ob_refcnt == 1);
   assert (!PyDict_SetItemString(dictionary, "data", mv));
+  assert (mv->ob_refcnt == 2);
+  Py_DECREF(mv);
+  assert (mv->ob_refcnt == 1);
 
   // inject buffer object into module
   Buffer mr_buffer;
   AllocBuffer(&mr_buffer, 28 /* ??? */, 1024);
   PyObject* MapReduceBuffer = MapReduceBuffer_FromBuffer(&mr_buffer);
+  assert (MapReduceBuffer->ob_refcnt == 1);
 
   Buffer mr_obuffer; // output buffer
   AllocBuffer(&mr_obuffer, 28 /* ??? */, 1024);
   PyObject* MapReduceOBuffer = MapReduceBuffer_FromBuffer(&mr_obuffer);
+  assert (MapReduceOBuffer->ob_refcnt == 1);
 
   assert (!PyDict_SetItemString(dictionary, "buffer", MapReduceBuffer));
+  assert (MapReduceBuffer->ob_refcnt == 2);
   assert (!PyDict_SetItemString(dictionary, "obuffer", MapReduceOBuffer));
+  assert (MapReduceOBuffer->ob_refcnt == 2);
   Py_DECREF(MapReduceBuffer);
+  assert (MapReduceBuffer->ob_refcnt == 1);
   Py_DECREF(MapReduceOBuffer);
+  assert (MapReduceOBuffer->ob_refcnt == 1);
 
   // ok, now we read to run py interpreter: command, string, file
   int py_argc = 2;
   char* py_argv[] = {"python", "/dev/test.py"};
   assert(!Py_Main(py_argc, py_argv));
-  PyBuffer_Release(buffer);
-  Py_DECREF(mv);
-  free(buffer);
 
-  Py_Finalize();
+  PyBuffer_Release(&buffer);
+  FreeBufferData(&mr_buffer);
+  FreeBufferData(&mr_obuffer);
+  free(data);
   return 0;
 }

@@ -3,8 +3,14 @@
 import os, sys
 import unittest
 import hashlib
+import gc
+
 import zmapreduce
 import _zmapreduce
+
+def howmany(cls):
+	return len([x for x in gc.get_objects() if isinstance(x,cls)])
+
 
 def Combine(input, output):
 	pr = input[0]
@@ -135,6 +141,21 @@ class ZMapReduceCExtensionTest(unittest.TestCase):
 		self.assertEqual(buffer[0].key, KEY)
 		self.assertEqual(buffer[0].value, VALUE)
 
+	def testBufferAppendingWithWrongArg(self):
+		buffer.clear()
+		r = buffer.append()
+
+		with self.assertRaises(TypeError):
+			r.key = 1
+
+		with self.assertRaises(TypeError):
+			r.hash = 1
+
+		with self.assertRaises(TypeError):
+			r.value = 1
+
+		with self.assertRaises(TypeError):
+			buffer.append_record(None, None, None)
 
 	def testBufferFailWrongIndex(self):
 		with self.assertRaises(IndexError):
@@ -321,8 +342,35 @@ class ZMapReduceCExtensionTest(unittest.TestCase):
 		self.assertEqual(r.key, r'0123456789')
 		self.assertEqual(r.value, r'qwertyuiop[]asdfghjkl;zxcvbnm',)
 		self.assertEqual(r.hash, r'11111111')
-	
+
+class ZMapReduceRefCountTest(unittest.TestCase):
+	def testInputsFromCcode(self):
+		# refcount == 2 cause we're creating temporary object as getrefcount argument!
+		self.assertEquals(sys.getrefcount(buffer), 2)
+		self.assertEquals(sys.getrefcount(obuffer), 2)
+		self.assertEquals(sys.getrefcount(data), 2)
+
+
+	def testRecordCreation(self):
+		r = buffer.append()
+		r.hash = r'012345'
+		r.key = r'09876'
+		r.value = r'zxcvbnm'
+
+		k,v,h = r.key, r.value, r.hash
+		self.assertEquals(sys.getrefcount(r), 2)
+		# only temp object should count
+		self.assertEquals(sys.getrefcount(r.key), 1)
+		self.assertEquals(sys.getrefcount(r.value), 1)
+		self.assertEquals(sys.getrefcount(r.hash), 1)
+
 		
 if __name__ == "__main__":
-    unittest.main()
-    
+	# have to do such thing, cause we're using pymain from custom c code
+	# unittest.main() throws SystemExit exception, leaving source executable
+	# with memory leaks and unfreed resources
+	try:
+		unittest.main()
+	except BaseException as e:
+		pass
+ 	  
